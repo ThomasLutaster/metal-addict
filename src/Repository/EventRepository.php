@@ -50,19 +50,17 @@ class EventRepository extends ServiceEntityRepository
     // /**
     //  * @return Event[] Returns an array of Event objects
     //  */
-    /*
-    public function findByExampleField($value)
+    public function findByUser($userId, $orderBy)
     {
         return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('e.id', 'ASC')
-            ->setMaxResults(10)
+            ->innerJoin('e.users', 'u')
+            ->where('u.id = :userId')
+            ->addSelect('u')
+            ->setParameter('userId', $userId)
+            ->orderBy('e.date', $orderBy)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
 
     /*
     public function findOneBySomeField($value): ?Event

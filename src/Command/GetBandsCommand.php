@@ -2,8 +2,9 @@
 
 namespace App\Command;
 
-use App\Entity\Country;
-use App\Service\SetlistApiGetDatas;
+use App\Entity\Band;
+use App\Repository\BandRepository;
+use App\Service\MusicbrainzApiGetDatas;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,12 +15,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'app:get-countries',
-    description: 'Get countries using setList API',
+    name: 'app:get-bands',
+    description: 'AGet bands using Musicbrainz Api',
 )]
-class GetCountriesCommand extends Command
+class GetBandsCommand extends Command
 {
-    public function __construct(private SetlistApiGetDatas $setlistApiGetDatas, private EntityManagerInterface $em)
+    public function __construct(private MusicbrainzApiGetDatas $musicbrainzApiGetDatas, private EntityManagerInterface $em, private BandRepository $bandRepository)
     {
         parent::__construct();
     }
@@ -44,20 +45,29 @@ class GetCountriesCommand extends Command
             // ...
         }
 
-        $countries = $this->setlistApiGetDatas->getApiSetlistCountries();
 
-        foreach ($countries["country"] as $apiCountry) {
-            $country = new Country();
+        //todo : modify loop to get more bands
+        for ($offset = 2001; $offset < 3002; $offset += 100) {
+            $bands = $this->musicbrainzApiGetDatas->getMusicbrainzBands($offset);
 
-            $country->setName($apiCountry["name"]);
-            $country->setCountryCode($apiCountry["code"]);
+            foreach ($bands['artists'] as $apiBand) {
 
-            $this->em->persist($country);
+                if ($this->bandRepository->findOneBy(['musicbrainzId' => $apiBand['id']]) === null) {
+                    $band = new Band();
+
+                    $band->setMusicbrainzId($apiBand['id']);
+                    $band->setName($apiBand['name']);
+
+                    $this->em->persist($band);
+                }
+            }
+            $this->em->flush();
+            usleep(2000000);
         }
 
-        $this->em->flush();
 
-        $io->success('All countries are saved in database');
+
+        $io->success('All bands are saved in database');
 
         return Command::SUCCESS;
     }
