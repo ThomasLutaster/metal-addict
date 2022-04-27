@@ -26,6 +26,10 @@ class Picture
     #[ORM\JoinColumn(nullable: false)]
     private $event;
 
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'pictures')]
+    #[ORM\JoinColumn(nullable: false)]
+    private $user;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +79,18 @@ class Picture
     public function setEvent(?Event $event): self
     {
         $this->event = $event;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
