@@ -2,12 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -18,21 +19,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[Assert\NotBlank(groups: ["registration"])]
+    #[Assert\Email(groups: ["registration", "edit"])]
     private $email;
 
     #[ORM\Column(type: 'json')]
     private $roles = [];
 
     #[ORM\Column(type: 'string')]
+    #[Assert\NotBlank(groups: ["registration"])]
+    #[Assert\Length(min: 8, max: 32, groups: ["registration", "edit"])]
+    #[Assert\Regex(pattern: "/^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W])(?=.*\d).{6,}$/i", groups: ["registration", "edit"])]
     private $password;
 
     #[ORM\Column(type: 'string', length: 100)]
+    #[Assert\Length(min: 2, max: 20, groups: ["edit"])]
     private $nickname;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private $biography;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Assert\Image(maxSize: '5M')]
     private $avatar;
 
     #[ORM\Column(type: 'datetime')]
@@ -55,6 +63,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->pictures = new ArrayCollection();
         $this->reviews = new ArrayCollection();
         $this->events = new ArrayCollection();
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
