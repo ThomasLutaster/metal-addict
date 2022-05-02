@@ -6,6 +6,7 @@ use App\Repository\BandRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BandRepository::class)]
 class Band
@@ -13,15 +14,18 @@ class Band
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['band_browse'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['band_browse', 'picture_browse'])]
     private $name;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
     private $musicbrainzId;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['band_browse'])]
     private $image;
 
     #[ORM\Column(type: 'datetime')]

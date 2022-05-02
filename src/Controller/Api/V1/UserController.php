@@ -6,7 +6,7 @@ use Exception;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Repository\EventRepository;
-use App\Service\AvatarUploader;
+use App\Service\PictureUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +32,7 @@ class UserController extends AbstractController
             $users = $userRepository->findAll();
         }
 
-        return $this->json($users, 200);
+        return $this->json($users, 200, [], ['groups' => 'user']);
     }
 
     #[Route('/{id}', name: 'read', methods: 'GET')]
@@ -42,7 +42,7 @@ class UserController extends AbstractController
             return $this->json('The user doesn\'t exist', 404);
         }
 
-        return $this->json($user, 200);
+        return $this->json($user, 200, [], ['groups' => 'user']);
     }
 
     #[Route('', name: 'add', methods: 'POST')]
@@ -69,10 +69,10 @@ class UserController extends AbstractController
             }
         }
 
-        return $this->json($newUser, 201);
+        return $this->json($newUser, 201, [], ['groups' => 'user']);
     }
 
-    #[Route('/{id}', name: 'edit', methods: "PATCH")]
+    #[Route('/{id<\d+>}', name: 'edit', methods: "PATCH")]
     public function edit(?User $user, Request $request, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em, UserPasswordHasherInterface $userPasswordHasherInterface): Response
     {
         if ($user === null) {
@@ -107,11 +107,11 @@ class UserController extends AbstractController
             }
         }
 
-        return $this->json($newUser, 200);
+        return $this->json($newUser, 200, [], ['groups' => 'user']);
     }
 
-    #[Route('/avatar/{id}', name: 'avatar_add', methods: 'POST')]
-    public function addAvatar(User $user, Filesystem $filesystem, Request $request, ValidatorInterface $validator, AvatarUploader $avatarUploader, EntityManagerInterface $em): Response
+    #[Route('/avatar/{id<\d+>}', name: 'avatar_add', methods: 'POST')]
+    public function addAvatar(User $user, Filesystem $filesystem, Request $request, ValidatorInterface $validator, PictureUploader $pictureUploader, EntityManagerInterface $em): Response
     {
         if ($user === null) {
             return $this->json('The user doesn\'t exist', 404);
@@ -135,16 +135,16 @@ class UserController extends AbstractController
             return $this->json($errors, 422);
         }
 
-        $newFileName = $avatarUploader->upload($uploadedFile);
+        $newFileName = $pictureUploader->upload($uploadedFile, $_ENV['AVATAR_PICTURE']);
 
         $user->setAvatar($newFileName);
         $user->setUpdatedAt(new \DateTime());
         $em->flush();
 
-        return $this->json($user, 200);
+        return $this->json($user, 200, [], ['groups' => 'user']);
     }
 
-    #[Route('/avatar/{id}', name: 'avatar_delete', methods: 'DELETE')]
+    #[Route('/avatar/{id<\d+>}', name: 'avatar_delete', methods: 'DELETE')]
     public function deleteAvatar(User $user, Filesystem $filesystem, EntityManagerInterface $em): Response
     {
         if ($user === null) {
@@ -154,11 +154,10 @@ class UserController extends AbstractController
         $userAvatar = $user->getAvatar();
 
         if ($userAvatar != NULL) {
-            $targetDirectory = $_ENV['AVATAR_PICTURE'];
-            $path = $targetDirectory . '/' . $userAvatar;
-            $filesystem->remove($path);
+            $filesystem->remove($userAvatar);
 
             $user->setAvatar(null);
+            $user->setUpdatedAt(new \DateTime());
             $em->flush();
 
             return $this->json("Avatar deleted", 204);
