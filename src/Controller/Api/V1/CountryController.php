@@ -7,7 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/v1/country', name: 'api_v1_country_')]
+#[Route('/api/v1/country', name: 'api_v1_country_', methods: 'GET')]
 class CountryController extends AbstractController
 {
     #[Route('', name: '')]

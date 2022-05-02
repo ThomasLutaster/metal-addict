@@ -55,6 +55,7 @@ class Event
         $this->pictures = new ArrayCollection();
         $this->reviews = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
