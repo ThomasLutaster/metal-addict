@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Api\V1;
 
-use App\Entity\User;
 use App\Entity\Event;
 use App\Entity\Picture;
 use App\Repository\EventRepository;
@@ -49,9 +48,11 @@ class PictureController extends AbstractController
         return $this->json($pictures, 200, [], ["groups" => "picture_browse"]);
     }
 
-    #[Route('/{id<\d+>}/{setlistId}', name: 'add', methods: "POST")]
-    public function index(User $user, Event $event, Request $request, ValidatorInterface $validator, EntityManagerInterface $em, PictureUploader $pictureUploader): Response
+    #[Route('/{setlistId}', name: 'add', methods: "POST")]
+    public function index(?Event $event, Request $request, ValidatorInterface $validator, EntityManagerInterface $em, PictureUploader $pictureUploader): Response
     {
+        $user = $this->getUser();
+
         if (!$user->getEvents()->contains($event)) {
             return $this->json('The user is not linked with the event', 403);
         }
@@ -74,7 +75,6 @@ class PictureController extends AbstractController
         }
 
         $path = $pictureUploader->upload($uploadedFile, $_ENV['EVENT_PICTURE']);
-
 
         $picture = new Picture();
         $picture->setPath($path);

@@ -90,6 +90,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
+     * A visual identifier that represents this user. Use for login with jwt bundle
+     */
+    public function getUsername(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
      * A visual identifier that represents this user.
      *
      * @see UserInterface
