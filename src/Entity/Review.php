@@ -18,10 +18,14 @@ class Review
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['review'])]
+    #[Assert\NotBlank()]
+    #[Assert\Length(min: 5, max: 50)]
     private $title;
 
     #[ORM\Column(type: 'text')]
     #[Groups(['review'])]
+    #[Assert\NotBlank()]
+    #[Assert\Length(min: 10)]
     private $content;
 
     #[ORM\Column(type: 'datetime')]
@@ -40,6 +44,11 @@ class Review
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['review'])]
     private $user;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+    }
 
     public function getId(): ?int
     {

@@ -59,6 +59,7 @@ class ReviewController extends AbstractController
         $user = $this->getUser();
 
         $review = $reviewRepository->findByUserAndEvent($user, $event);
+        dd($review);
         if ($review !== null) {
             return $this->json('The user has already writen a review for this event', 409);
         }

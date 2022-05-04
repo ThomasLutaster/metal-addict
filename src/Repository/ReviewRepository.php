@@ -116,7 +116,7 @@ class ReviewRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('r')
             ->andWhere('r.user = :user')
-            ->andWhere('e.event = :event')
+            ->andWhere('r.event = :event')
             ->setParameter('user', $user)
             ->setParameter('event', $event)
             ->getQuery()
