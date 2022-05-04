@@ -91,6 +91,8 @@ class ReviewController extends AbstractController
     #[Route('/{id<\d+>}', name: 'edit', methods: 'PATCH')]
     public function edit(?Review $review, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface, EntityManagerInterface $em): Response
     {
+        $this->denyAccessUnlessGranted('edit', $review);
+
         if ($review === null) {
             return $this->json('The review doesn\'t exist', 404);
         }
@@ -115,6 +117,8 @@ class ReviewController extends AbstractController
     #[Route('/{id<\d+>}', name: 'delete', methods: 'DELETE')]
     public function delete(?Review $review, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface, EntityManagerInterface $em): Response
     {
+        $this->denyAccessUnlessGranted('delete', $review);
+
         if ($review === null) {
             return $this->json('The review doesn\'t exist', 404);
         }
