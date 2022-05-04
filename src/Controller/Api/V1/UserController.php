@@ -75,6 +75,8 @@ class UserController extends AbstractController
     #[Route('/{id<\d+>}', name: 'edit', methods: "PATCH")]
     public function edit(?User $user, Request $request, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em, UserPasswordHasherInterface $userPasswordHasherInterface): Response
     {
+        $this->denyAccessUnlessGranted('edit', $user);
+
         if ($user === null) {
             return $this->json('The user doesn\'t exist', 404);
         }
@@ -113,6 +115,8 @@ class UserController extends AbstractController
     #[Route('/avatar/{id<\d+>}', name: 'avatar_add', methods: 'POST')]
     public function addAvatar(User $user, Filesystem $filesystem, Request $request, ValidatorInterface $validator, PictureUploader $pictureUploader, EntityManagerInterface $em): Response
     {
+        $this->denyAccessUnlessGranted('avatar', $user);
+
         if ($user === null) {
             return $this->json('The user doesn\'t exist', 404);
         }
@@ -147,6 +151,8 @@ class UserController extends AbstractController
     #[Route('/avatar/{id<\d+>}', name: 'avatar_delete', methods: 'DELETE')]
     public function deleteAvatar(User $user, Filesystem $filesystem, EntityManagerInterface $em): Response
     {
+        $this->denyAccessUnlessGranted('avatar', $user);
+
         if ($user === null) {
             return $this->json('The user doesn\'t exist', 404);
         }
