@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\ReviewRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
 class Review
@@ -11,15 +13,19 @@ class Review
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['review'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['review'])]
     private $title;
 
     #[ORM\Column(type: 'text')]
+    #[Groups(['review'])]
     private $content;
 
     #[ORM\Column(type: 'datetime')]
+    #[Groups(['review'])]
     private $createdAt;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
@@ -27,10 +33,12 @@ class Review
 
     #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['review'])]
     private $event;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'reviews')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['review'])]
     private $user;
 
     public function getId(): ?int

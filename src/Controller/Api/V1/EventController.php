@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api\V1;
 
-use App\Entity\Band;
 use App\Entity\Event;
 use App\Repository\BandRepository;
 use App\Service\FanartApiGetDatas;

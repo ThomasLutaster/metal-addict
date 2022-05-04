@@ -64,15 +64,62 @@ class ReviewRepository extends ServiceEntityRepository
     }
     */
 
-    /*
-    public function findOneBySomeField($value): ?Review
+    public function findByUserAndEventIds($order = 'DESC', $userId, $setlistId)
     {
         return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
+            ->innerJoin('r.user', 'u')
+            ->innerJoin('r.event', 'e')
+            ->addSelect('u')
+            ->addSelect('e')
+            ->andWhere('u.id = :uVal')
+            ->andWhere('e.setlistId = :eVal')
+            ->setParameter('uVal', $userId)
+            ->setParameter('eVal', $setlistId)
+            ->orderBy('r.createdAt', $order)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getResult();
     }
-    */
+
+    public function findByEvent($order, $setlistId)
+    {
+        return $this->createQueryBuilder('r')
+            ->innerJoin('r.event', 'e')
+            ->addSelect('e')
+            ->andWhere('e.setlistId = :val')
+            ->setParameter('val', $setlistId)
+            ->orderBy('r.createdAt', $order)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByUser($order, $userId)
+    {
+        return $this->createQueryBuilder('r')
+            ->innerJoin('r.user', 'u')
+            ->addSelect('u')
+            ->andWhere('u.id = :val')
+            ->setParameter('val', $userId)
+            ->orderBy('r.createdAt', $order)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByLatest($order = "DESC", $limit)
+    {
+        return $this->createQueryBuilder('r')
+            ->orderBy('r.createdAt', $order)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+    public function findByUserAndEvent($user, $event)
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.user = :user')
+            ->andWhere('e.event = :event')
+            ->setParameter('user', $user)
+            ->setParameter('event', $event)
+            ->getQuery()
+            ->getResult();
+    }
 }

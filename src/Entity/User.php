@@ -17,7 +17,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['picture_browse', 'user'])]
+    #[Groups(['picture_browse', 'user', 'review'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 180, unique: true)]
@@ -37,7 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string', length: 100)]
     #[Assert\Length(min: 2, max: 20, groups: ["edit"])]
-    #[Groups(['picture_browse', 'user'])]
+    #[Groups(['picture_browse', 'user', 'review'])]
     private $nickname;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -46,7 +46,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     #[Assert\Image(maxSize: '5M')]
-    #[Groups(['picture_browse', 'user'])]
+    #[Groups(['picture_browse', 'user', 'review'])]
     private $avatar;
 
     #[ORM\Column(type: 'datetime')]

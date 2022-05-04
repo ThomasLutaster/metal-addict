@@ -15,23 +15,23 @@ class Event
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['picture_browse', 'event_browse'])]
+    #[Groups(['picture_browse', 'event_browse', 'review'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Groups(['picture_browse', 'event_browse'])]
+    #[Groups(['picture_browse', 'event_browse', 'review'])]
     private $setlistId;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Groups(['event_browse'])]
+    #[Groups(['event_browse', 'review'])]
     private $venue;
 
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['event_browse'])]
+    #[Groups(['event_browse', 'review'])]
     private $city;
 
     #[ORM\Column(type: 'datetime')]
-    #[Groups(['event_browse'])]
+    #[Groups(['event_browse', 'review'])]
     private $date;
 
     #[ORM\Column(type: 'datetime')]
@@ -42,7 +42,7 @@ class Event
 
     #[ORM\ManyToOne(targetEntity: Country::class, inversedBy: 'events')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['event_browse'])]
+    #[Groups(['event_browse', 'review'])]
     private $country;
 
     #[ORM\OneToMany(mappedBy: 'event', targetEntity: Picture::class, orphanRemoval: true)]
@@ -50,7 +50,7 @@ class Event
 
     #[ORM\ManyToOne(targetEntity: Band::class, inversedBy: 'events')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['picture_browse', 'event_browse'])]
+    #[Groups(['picture_browse', 'event_browse', 'review'])]
     private $band;
 
     #[ORM\OneToMany(mappedBy: 'event', targetEntity: Review::class, orphanRemoval: true)]
