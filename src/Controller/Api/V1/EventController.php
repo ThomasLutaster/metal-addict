@@ -71,12 +71,12 @@ class EventController extends AbstractController
             return $this->json($event, 201);
         } elseif ($event != null) {
             if ($event->getUsers()->contains($user)) {
-                return $this->json("User alredy link to the event", 403);
+                return $this->json("User already link to the event", 403);
             }
             $event->addUser($user);
             $em->flush();
 
-            return $this->json($event, 201);
+            return $this->json($event, 201, [], ['groups' => 'event_browse']);
         } else {
             return $this->json("Forbidden", 403);
         }

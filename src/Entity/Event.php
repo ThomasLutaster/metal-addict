@@ -6,6 +6,8 @@ use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -13,18 +15,23 @@ class Event
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['picture_browse', 'event_browse'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['picture_browse', 'event_browse'])]
     private $setlistId;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['event_browse'])]
     private $venue;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['event_browse'])]
     private $city;
 
     #[ORM\Column(type: 'datetime')]
+    #[Groups(['event_browse'])]
     private $date;
 
     #[ORM\Column(type: 'datetime')]
@@ -35,6 +42,7 @@ class Event
 
     #[ORM\ManyToOne(targetEntity: Country::class, inversedBy: 'events')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['event_browse'])]
     private $country;
 
     #[ORM\OneToMany(mappedBy: 'event', targetEntity: Picture::class, orphanRemoval: true)]
@@ -42,6 +50,7 @@ class Event
 
     #[ORM\ManyToOne(targetEntity: Band::class, inversedBy: 'events')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['picture_browse', 'event_browse'])]
     private $band;
 
     #[ORM\OneToMany(mappedBy: 'event', targetEntity: Review::class, orphanRemoval: true)]

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PictureRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: PictureRepository::class)]
 class Picture
@@ -11,9 +12,11 @@ class Picture
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['picture_browse'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['picture_browse'])]
     private $path;
 
     #[ORM\Column(type: 'datetime')]
@@ -24,11 +27,19 @@ class Picture
 
     #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'pictures')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['picture_browse'])]
     private $event;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'pictures')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['picture_browse'])]
     private $user;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
 
     public function getId(): ?int
     {

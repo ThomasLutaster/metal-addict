@@ -15,6 +15,6 @@ class BandController extends AbstractController
     {
         $bands = $bandRepository->findAll();
 
-        return $this->json($bands, 200);
+        return $this->json($bands, 200, [], ['groups' => 'band_browse']);
     }
 }
