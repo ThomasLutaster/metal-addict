@@ -4,16 +4,17 @@ namespace App\Controller\Api\V1;
 
 use App\Entity\Event;
 use App\Entity\Review;
+use App\Repository\UserRepository;
 use App\Repository\EventRepository;
 use App\Repository\ReviewRepository;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/v1/review', name: 'api_v1_review_')]
 class ReviewController extends AbstractController
@@ -59,8 +60,7 @@ class ReviewController extends AbstractController
         $user = $this->getUser();
 
         $review = $reviewRepository->findByUserAndEvent($user, $event);
-        dd($review);
-        if ($review !== null) {
+        if (count($review) > 0) {
             return $this->json('The user has already writen a review for this event', 409);
         }
         if (!$user->getEvents()->contains($event)) {
@@ -68,6 +68,7 @@ class ReviewController extends AbstractController
         }
 
         $jsonContent = $request->getContent();
+
         $review = $serializer->deserialize($jsonContent, Review::class, 'json');
 
         $errors = $validatorInterface->validate($review);
@@ -75,7 +76,7 @@ class ReviewController extends AbstractController
         if (count($errors) > 0) {
             $errorsString = (string) $errors;
 
-            return $this->json($errorsString, Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->json($errorsString, 422);
         }
 
         $review->setUser($user);
@@ -85,5 +86,42 @@ class ReviewController extends AbstractController
         $em->flush();
 
         return $this->json($review, 201, [], ['groups' => 'review']);
+    }
+
+    #[Route('/{id<\d+>}', name: 'edit', methods: 'PATCH')]
+    public function edit(?Review $review, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface, EntityManagerInterface $em): Response
+    {
+        if ($review === null) {
+            return $this->json('The review doesn\'t exist', 404);
+        }
+
+        $jsonContent = $request->getContent();
+
+        $review = $serializer->deserialize($jsonContent, Review::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $review]);
+
+        $errors = $validatorInterface->validate($review);
+
+        if (count($errors) > 0) {
+            $errorsString = (string) $errors;
+
+            return $this->json($errorsString, 422);
+        }
+
+        $em->flush();
+
+        return $this->json($review, 201, [], ['groups' => 'review']);
+    }
+
+    #[Route('/{id<\d+>}', name: 'delete', methods: 'DELETE')]
+    public function delete(?Review $review, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface, EntityManagerInterface $em): Response
+    {
+        if ($review === null) {
+            return $this->json('The review doesn\'t exist', 404);
+        }
+
+        $em->remove($review);
+        $em->flush();
+
+        return $this->json("The review is deleted", 204);
     }
 }
