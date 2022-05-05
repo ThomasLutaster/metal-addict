@@ -7,7 +7,6 @@ use App\Entity\Review;
 use App\Repository\UserRepository;
 use App\Repository\EventRepository;
 use App\Repository\ReviewRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -55,7 +54,7 @@ class ReviewController extends AbstractController
     }
 
     #[Route('/{setlistId}', name: 'add', methods: 'POST')]
-    public function add(?Event $event, ReviewRepository $reviewRepository, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface, EntityManagerInterface $em): Response
+    public function add(?Event $event, ReviewRepository $reviewRepository, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface): Response
     {
         $user = $this->getUser();
 
@@ -82,14 +81,13 @@ class ReviewController extends AbstractController
         $review->setUser($user);
         $review->setEvent($event);
 
-        $em->persist($review);
-        $em->flush();
+        $reviewRepository->add($review);
 
         return $this->json($review, 201, [], ['groups' => 'review']);
     }
 
     #[Route('/{id<\d+>}', name: 'edit', methods: 'PATCH')]
-    public function edit(?Review $review, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface, EntityManagerInterface $em): Response
+    public function edit(?Review $review, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface, ReviewRepository $reviewRepository): Response
     {
         $this->denyAccessUnlessGranted('edit', $review);
 
@@ -109,18 +107,19 @@ class ReviewController extends AbstractController
             return $this->json($errorsString, 422);
         }
 
-        $em->flush();
+        $review->setUpdatedAt(new \DateTime);
+
+        $reviewRepository->add($review);
 
         return $this->json($review, 201, [], ['groups' => 'review']);
     }
 
     #[Route('/{id<\d+>}', name: 'delete', methods: 'DELETE')]
-    public function delete(?Review $review, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface, EntityManagerInterface $em): Response
+    public function delete(?Review $review, ReviewRepository $reviewRepository): Response
     {
         $this->denyAccessUnlessGranted('delete', $review);
 
-        $em->remove($review);
-        $em->flush();
+        $reviewRepository->remove($review);
 
         return $this->json("The review is deleted", 204);
     }

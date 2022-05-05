@@ -7,7 +7,6 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Repository\EventRepository;
 use App\Service\PictureUploader;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -46,7 +45,7 @@ class UserController extends AbstractController
     }
 
     #[Route('', name: 'add', methods: 'POST')]
-    public function add(Request $request, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em, UserPasswordHasherInterface $userPasswordHasherInterface): Response
+    public function add(Request $request, SerializerInterface $serializer, ValidatorInterface $validator, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasherInterface): Response
     {
         $jsonContent = $request->getContent();
         $newUser = $serializer->deserialize($jsonContent, User::class, 'json');
@@ -59,10 +58,8 @@ class UserController extends AbstractController
         $newUser->setPassword($userPasswordHasherInterface->hashPassword($newUser, $newUser->getPassword()));
         $newUser->setRoles(['ROLE_USER']);
 
-        $em->persist($newUser);
-
         try {
-            $em->flush();
+            $userRepository->add($newUser);
         } catch (Exception $e) {
             if ($e->getCode() === 1062) {
                 return $this->json('The email is already used', 409);
@@ -73,7 +70,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id<\d+>}', name: 'edit', methods: "PATCH")]
-    public function edit(?User $user, Request $request, SerializerInterface $serializer, ValidatorInterface $validator, EntityManagerInterface $em, UserPasswordHasherInterface $userPasswordHasherInterface): Response
+    public function edit(?User $user, Request $request, SerializerInterface $serializer, ValidatorInterface $validator, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasherInterface): Response
     {
         $this->denyAccessUnlessGranted('edit', $user);
 
@@ -84,36 +81,36 @@ class UserController extends AbstractController
         $jsonContent = $request->getContent();
         $content = json_decode($jsonContent, true);
 
-        $newUser = $serializer->deserialize($jsonContent, User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $user]);
+        $updatedUser = $serializer->deserialize($jsonContent, User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $user]);
 
         if (isset($content['newPassword']) && isset($content['oldPassword'])) {
             if (!$userPasswordHasherInterface->isPasswordValid($user, $content['oldPassword'])) {
                 return $this->json('Password is not correct', 401);
             }
-            $newUser->setPassword($content['newPassword']);
+            $updatedUser->setPassword($content['newPassword']);
         }
 
-        $errors = $validator->validate(value: $newUser, groups: "edit");
+        $errors = $validator->validate(value: $updatedUser, groups: "edit");
         if (count($errors) > 0) {
             return $this->json($errors, 422);
         }
 
-        $newUser->setPassword($userPasswordHasherInterface->hashPassword($newUser, $newUser->getPassword()));
-        $newUser->setUpdatedAt(new \DateTime());
+        $updatedUser->setPassword($userPasswordHasherInterface->hashPassword($updatedUser, $updatedUser->getPassword()));
+        $updatedUser->setUpdatedAt(new \DateTime());
 
         try {
-            $em->flush();
+            $userRepository->add($updatedUser);
         } catch (Exception $e) {
             if ($e->getCode() === 1062) {
                 return $this->json('The email is already used', 409);
             }
         }
 
-        return $this->json($newUser, 200, [], ['groups' => 'user']);
+        return $this->json($updatedUser, 200, [], ['groups' => 'user']);
     }
 
     #[Route('/avatar/{id<\d+>}', name: 'avatar_add', methods: 'POST')]
-    public function addAvatar(?User $user, Filesystem $filesystem, Request $request, ValidatorInterface $validator, PictureUploader $pictureUploader, EntityManagerInterface $em): Response
+    public function addAvatar(?User $user, Filesystem $filesystem, Request $request, ValidatorInterface $validator, PictureUploader $pictureUploader, UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('avatar', $user);
 
@@ -143,13 +140,13 @@ class UserController extends AbstractController
 
         $user->setAvatar($newFileName);
         $user->setUpdatedAt(new \DateTime());
-        $em->flush();
+        $userRepository->add($user);
 
         return $this->json($user, 200, [], ['groups' => 'user']);
     }
 
     #[Route('/avatar/{id<\d+>}', name: 'avatar_delete', methods: 'DELETE')]
-    public function deleteAvatar(?User $user, Filesystem $filesystem, EntityManagerInterface $em): Response
+    public function deleteAvatar(?User $user, Filesystem $filesystem, UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('avatar', $user);
 
@@ -164,7 +161,8 @@ class UserController extends AbstractController
 
             $user->setAvatar(null);
             $user->setUpdatedAt(new \DateTime());
-            $em->flush();
+
+            $userRepository->add($user);
 
             return $this->json("Avatar deleted", 204);
         }

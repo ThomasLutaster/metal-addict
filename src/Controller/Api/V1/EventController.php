@@ -8,7 +8,6 @@ use App\Service\FanartApiGetDatas;
 use App\Repository\EventRepository;
 use App\Service\SetlistApiGetDatas;
 use App\Repository\CountryRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -49,7 +48,7 @@ class EventController extends AbstractController
     }
 
     #[Route('/{setlistId}', name: 'add', methods: 'POST')]
-    public function add($setlistId, EventRepository $eventRepository, SetlistApiGetDatas $setlistApiGetDatas, CountryRepository $countryRepository, BandRepository $bandRepository, EntityManagerInterface $em)
+    public function add($setlistId, EventRepository $eventRepository, SetlistApiGetDatas $setlistApiGetDatas, CountryRepository $countryRepository, BandRepository $bandRepository)
     {
         $event = $eventRepository->findOneBy(['setlistId' => $setlistId]);
         $user = $this->getUser();
@@ -64,8 +63,7 @@ class EventController extends AbstractController
             $event->setBand($bandRepository->findOneBy(['name' => $setlistEvent['artist']['name']]));
             $event->setCountry($countryRepository->findOneBy(['countryCode' => $setlistEvent['venue']['city']['country']['code']]));
             $event->addUser($user);
-            $em->persist($event);
-            $em->flush();
+            $eventRepository->add($event);
 
             return $this->json($event, 201);
         } elseif ($event != null) {
@@ -73,7 +71,7 @@ class EventController extends AbstractController
                 return $this->json("User already link to the event", 403);
             }
             $event->addUser($user);
-            $em->flush();
+            $eventRepository->add($event);
 
             return $this->json($event, 201, [], ['groups' => 'event_browse']);
         } else {
