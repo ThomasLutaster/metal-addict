@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 class EventController extends AbstractController
 {
     #[Route('', name: '', methods: 'GET')]
-    public function browse(SetlistApiGetDatas $setlistApiGetDatas, EventRepository $eventRepository, FanartApiGetDatas $fanartApiGetDatas, Request $request, CountryRepository $countryRepository): Response
+    public function browse(SetlistApiGetDatas $setlistApiGetDatas, EventRepository $eventRepository, FanartApiGetDatas $fanartApiGetDatas, Request $request, CountryRepository $countryRepository, BandRepository $bandRepository): Response
     {
         $queryParams = $request->query->all();
 
@@ -25,10 +25,22 @@ class EventController extends AbstractController
             $events = $eventRepository->findByUser($queryParams["user"], $queryParams["order"]);
         } else {
             if (array_key_exists("countryId", $queryParams)) {
-                $queryParams["countryCode"] = $countryRepository->find($queryParams["countryId"])->getCountryCode();
+                $queryParams["countryCode"] = $countryRepository->find($queryParams["countryId"])?->getCountryCode();
                 unset($queryParams["countryId"]);
             }
-            $events["setlist"] = $setlistApiGetDatas->getApiSetlistSearch($queryParams);
+
+            if (array_key_exists("artistId", $queryParams)) {
+                $queryParams["artistMbid"] = $bandRepository->find($queryParams["artistId"])->getMusicbrainzId();
+                unset($queryParams["artistId"]);
+            }
+
+            foreach ($queryParams as $queryParam => $value) {
+                if (!$value) {
+                    unset($queryParams[$queryParam]);
+                }
+            }
+
+            $events = $setlistApiGetDatas->getApiSetlistSearch($queryParams);
             $events["bandImages"] = $fanartApiGetDatas->getApiFanartImages($queryParams["artistMbid"]);
         }
 
