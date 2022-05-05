@@ -9,7 +9,6 @@ use App\Repository\PictureRepository;
 use App\Repository\ReviewRepository;
 use App\Repository\UserRepository;
 use App\Service\PictureUploader;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints\Image;
@@ -27,29 +26,32 @@ class PictureController extends AbstractController
     {
         $queryParams = $request->query->all();
 
-        if (!isset($queryParams['user']) && !isset($queryParams['setlistId'])) {
+        if (!isset($queryParams['user']) && !isset($queryParams['setlistId']) && !isset($queryParams['review'])) {
             return $this->json("Missing query parameters", 404);
         }
 
-        if (!isset($queryParams['user']) && isset($queryParams['setlistId'])) {
-            $event = $eventRepository->findOneBy(['setlistId' => $queryParams['setlistId']]);
-            $pictures = $event->getPictures();
+        if (isset($queryParams['user']) && isset($queryParams['setlistId']) && !isset($queryParams['review'])) {
+            $pictures = $pictureRepository->findByUserAndEvent($queryParams['user'], $queryParams['setlistId'], $queryParams['order']);
         }
-        if (isset($queryParams['user']) && isset($queryParams['setlistId'])) {
-            $user = $userRepository->find($queryParams['user']);
-            $event = $eventRepository->findOneBy(['setlistId' => $queryParams['setlistId']]);
-            $pictures = $pictureRepository->findBy(["user" => $user, "event" => $event]);
+
+        if (!isset($queryParams['user']) && isset($queryParams['setlistId']) && !isset($queryParams['review'])) {
+            $pictures = $pictureRepository->findByEvent($queryParams['setlistId'], $queryParams['order']);
         }
-        if (isset($queryParams['user']) && !isset($queryParams['setlistId'])) {
-            $user = $userRepository->find($queryParams['user']);
-            $pictures = $user->getPictures();
+
+        if (isset($queryParams['user']) && !isset($queryParams['setlistId']) && !isset($queryParams['review'])) {
+            $pictures = $pictureRepository->findByUser($queryParams['user'], $queryParams['order']);
+        }
+
+        if (!isset($queryParams['user']) && !isset($queryParams['setlistId']) && isset($queryParams['review'])) {
+            $review = $reviewRepository->find($queryParams['review']);
+            $pictures = $pictureRepository->findByUserAndEvent($review->getUser()->getId(), $review->getEvent()->getSetlistId(), $queryParams['order']);
         }
 
         return $this->json($pictures, 200, [], ["groups" => "picture_browse"]);
     }
 
     #[Route('/{setlistId}', name: 'add', methods: "POST")]
-    public function index(?Event $event, Request $request, ValidatorInterface $validator, EntityManagerInterface $em, PictureUploader $pictureUploader): Response
+    public function index(?Event $event, Request $request, ValidatorInterface $validator, PictureUploader $pictureUploader, PictureRepository $pictureRepository): Response
     {
         $user = $this->getUser();
 
@@ -81,25 +83,21 @@ class PictureController extends AbstractController
         $picture->setEvent($event);
         $picture->setUser($user);
 
-        $em->persist($picture);
-        $em->flush();
+        $pictureRepository->add($picture);
 
         return $this->json($picture->getId(), 201);
     }
 
     #[Route('/{id<\d+>}', name: 'delete', methods: "DELETE")]
-    public function delete(?Picture $picture, Filesystem $filesystem, EntityManagerInterface $em): Response
+    public function delete(?Picture $picture, Filesystem $filesystem, PictureRepository $pictureRepository): Response
     {
-        if ($picture === null) {
-            return $this->json('The picture doesn\'t exist', 404);
-        }
+        $this->denyAccessUnlessGranted('delete', $picture);
 
         $path = $picture->getPath();
 
         $filesystem->remove($path);
 
-        $em->remove($picture);
-        $em->flush();
+        $pictureRepository->remove($picture);
 
         return $this->json(204);
     }

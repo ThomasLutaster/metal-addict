@@ -47,32 +47,39 @@ class PictureRepository extends ServiceEntityRepository
         }
     }
 
-    // /**
-    //  * @return Picture[] Returns an array of Picture objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findByUserAndEvent($user, $event, $order)
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
+            ->innerJoin('p.user', 'u')
+            ->innerJoin('p.event', 'e')
+            ->andWhere('u.id = :user')
+            ->andWhere('e.setlistId = :event')
+            ->setParameter('user', $user)
+            ->setParameter('event', $event)
+            ->orderBy('p.createdAt', $order)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Picture
+    public function findByUser($user, $order)
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
+            ->innerJoin('p.user', 'u')
+            ->andWhere('u.id = :user')
+            ->setParameter('user', $user)
+            ->orderBy('p.createdAt', $order)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getResult();
     }
-    */
+
+    public function findByEvent($event, $order)
+    {
+        return $this->createQueryBuilder('p')
+            ->innerJoin('p.event', 'e')
+            ->andWhere('e.setlistId = :event')
+            ->setParameter('event', $event)
+            ->orderBy('p.createdAt', $order)
+            ->getQuery()
+            ->getResult();
+    }
 }

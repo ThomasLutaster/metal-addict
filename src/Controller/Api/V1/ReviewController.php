@@ -119,10 +119,6 @@ class ReviewController extends AbstractController
     {
         $this->denyAccessUnlessGranted('delete', $review);
 
-        if ($review === null) {
-            return $this->json('The review doesn\'t exist', 404);
-        }
-
         $em->remove($review);
         $em->flush();
 
