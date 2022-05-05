@@ -23,7 +23,7 @@ class EventController extends AbstractController
         $queryParams = $request->query->all();
 
         if (array_key_exists("user", $queryParams)) {
-            $events = $eventRepository->findByUser($queryParams["userId"], $queryParams["order"]);
+            $events = $eventRepository->findByUser($queryParams["user"], $queryParams["order"]);
         } else {
             if (array_key_exists("countryId", $queryParams)) {
                 $queryParams["countryCode"] = $countryRepository->find($queryParams["countryId"])->getCountryCode();

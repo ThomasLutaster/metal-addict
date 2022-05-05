@@ -45,8 +45,11 @@ security:
         # - { path: ^/profile, roles: ROLE_USER }
         # - { path: ^/api/v1/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/band, methods:[GET], roles: PUBLIC_ACCESS }
-        - { path: ^/api/v1/user, methods:[POST], roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/picture, methods:[GET], roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/country, methods:[GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/user, methods:[POST, GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/review, methods:[GET], roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/event, methods:[GET], roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
