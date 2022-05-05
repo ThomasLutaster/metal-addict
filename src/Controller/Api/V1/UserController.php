@@ -4,17 +4,19 @@ namespace App\Controller\Api\V1;
 
 use Exception;
 use App\Entity\User;
+use App\Service\PictureUploader;
 use App\Repository\UserRepository;
 use App\Repository\EventRepository;
-use App\Service\PictureUploader;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Image;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/api/v1/user', name: 'app_api_v1_user_')]
@@ -131,9 +133,16 @@ class UserController extends AbstractController
         if ($uploadedFile === null) {
             return $this->json("No file found", 422);
         }
-        $errors = $validator->validate(value: $uploadedFile, groups: "avatar");
-        if (count($errors) > 0) {
-            return $this->json($errors, 422);
+
+        $violations = $validator->validate(
+            $uploadedFile,
+            [
+                new NotBlank(['message' => 'Please select a file to upload']),
+                new Image(['maxSize' => '5M',])
+            ]
+        );
+        if ($violations->count() > 0) {
+            return $this->json($violations, 400);
         }
 
         $newFileName = $pictureUploader->upload($uploadedFile, $_ENV['AVATAR_PICTURE']);

@@ -45,7 +45,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $biography;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Assert\Image(maxSize: '5M')]
     #[Groups(['picture_browse', 'user', 'review'])]
     private $avatar;
 
