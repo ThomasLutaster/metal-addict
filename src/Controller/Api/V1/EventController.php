@@ -44,7 +44,7 @@ class EventController extends AbstractController
             $events["bandImages"] = $fanartApiGetDatas->getApiFanartImages($queryParams["artistMbid"]);
         }
 
-        return $this->json($events, 200,);
+        return $this->json($events, 200, [], ['groups' => 'event_browse']);
     }
 
     #[Route('/{setlistId}', name: 'read', methods: 'GET')]

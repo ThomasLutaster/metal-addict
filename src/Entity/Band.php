@@ -18,7 +18,7 @@ class Band
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['band_browse', 'picture_browse'])]
+    #[Groups(['band_browse', 'picture_browse', 'event_browse', 'review'])]
     private $name;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
