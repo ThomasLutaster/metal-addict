@@ -44,7 +44,7 @@ class EventController extends AbstractController
             $events["bandImages"] = $fanartApiGetDatas->getApiFanartImages($queryParams["artistMbid"]);
         }
 
-        return $this->json($events, 200);
+        return $this->json($events, 200,);
     }
 
     #[Route('/{setlistId}', name: 'read', methods: 'GET')]
@@ -56,7 +56,7 @@ class EventController extends AbstractController
         $event["setlist"] = $setlistDatas;
         $event["bandImages"] = $bandImages;
 
-        return $this->json($event, 200);
+        return $this->json($event, 200, [], ['groups' => 'event_browse']);
     }
 
     #[Route('/{setlistId}', name: 'add', methods: 'POST')]
@@ -77,7 +77,7 @@ class EventController extends AbstractController
             $event->addUser($user);
             $eventRepository->add($event);
 
-            return $this->json($event, 201);
+            return $this->json($event, 201, [], ['groups' => 'event_browse']);
         } elseif ($event != null) {
             if ($event->getUsers()->contains($user)) {
                 return $this->json("User already link to the event", 403);

@@ -26,9 +26,10 @@ class UserController extends AbstractController
     public function browse(UserRepository $userRepository, Request $request, EventRepository $eventRepository): Response
     {
         $setlistIdParam = $request->query->get("setlistId");
+        $users = [];
 
         if ($setlistIdParam != null) {
-            $users = $eventRepository->findOneBy(["setlistId" => $setlistIdParam])->getUsers();
+            $users = $eventRepository->findOneBy(["setlistId" => $setlistIdParam]) ? $eventRepository->findOneBy(["setlistId" => $setlistIdParam]) : [];
         } else {
             $users = $userRepository->findAll();
         }
@@ -76,10 +77,6 @@ class UserController extends AbstractController
     {
         $this->denyAccessUnlessGranted('edit', $user);
 
-        if ($user === null) {
-            return $this->json('The user doesn\'t exist', 404);
-        }
-
         $jsonContent = $request->getContent();
         $content = json_decode($jsonContent, true);
 
@@ -90,14 +87,19 @@ class UserController extends AbstractController
                 return $this->json('Password is not correct', 401);
             }
             $updatedUser->setPassword($content['newPassword']);
+            $errors = $validator->validate(value: $updatedUser, groups: "registration");
+        } else {
+            $errors = $validator->validate(value: $updatedUser, groups: "edit");
         }
 
-        $errors = $validator->validate(value: $updatedUser, groups: "edit");
         if (count($errors) > 0) {
             return $this->json($errors, 422);
         }
 
-        $updatedUser->setPassword($userPasswordHasherInterface->hashPassword($updatedUser, $updatedUser->getPassword()));
+        if (isset($content['newPassword']) && isset($content['oldPassword'])) {
+            $user->setPassword($userPasswordHasherInterface->hashPassword($updatedUser, $updatedUser->getPassword()));
+        }
+
         $updatedUser->setUpdatedAt(new \DateTime());
 
         try {
@@ -116,19 +118,13 @@ class UserController extends AbstractController
     {
         $this->denyAccessUnlessGranted('avatar', $user);
 
-        if ($user === null) {
-            return $this->json('The user doesn\'t exist', 404);
-        }
-
         $userAvatar = $user->getAvatar();
 
-        if ($userAvatar != NULL) {
-            $targetDirectory = $_ENV['AVATAR_PICTURE'];
-            $path = $targetDirectory . '/' . $userAvatar;
-            $filesystem->remove($path);
+        if ($userAvatar !== NULL) {
+            $filesystem->remove($userAvatar);
         }
 
-        $uploadedFile = $request->files->get('avatar');
+        $uploadedFile = $request->files->get('image');
 
         if ($uploadedFile === null) {
             return $this->json("No file found", 422);
@@ -151,17 +147,13 @@ class UserController extends AbstractController
         $user->setUpdatedAt(new \DateTime());
         $userRepository->add($user);
 
-        return $this->json($user, 200, [], ['groups' => 'user']);
+        return $this->json($user->getAvatar(), 200);
     }
 
     #[Route('/avatar/{id<\d+>}', name: 'avatar_delete', methods: 'DELETE')]
     public function deleteAvatar(?User $user, Filesystem $filesystem, UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('avatar', $user);
-
-        if ($user === null) {
-            return $this->json('The user doesn\'t exist', 404);
-        }
 
         $userAvatar = $user->getAvatar();
 

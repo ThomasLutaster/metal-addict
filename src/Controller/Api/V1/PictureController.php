@@ -85,7 +85,7 @@ class PictureController extends AbstractController
 
         $pictureRepository->add($picture);
 
-        return $this->json($picture->getId(), 201);
+        return $this->json($picture, 201, [], ["groups" => "picture_browse"]);
     }
 
     #[Route('/{id<\d+>}', name: 'delete', methods: "DELETE")]
