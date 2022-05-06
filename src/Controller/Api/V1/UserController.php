@@ -29,7 +29,10 @@ class UserController extends AbstractController
         $users = [];
 
         if ($setlistIdParam != null) {
-            $users = $eventRepository->findOneBy(["setlistId" => $setlistIdParam]) ? $eventRepository->findOneBy(["setlistId" => $setlistIdParam]) : [];
+            $event = $eventRepository->findOneBy(["setlistId" => $setlistIdParam]);
+            if ($event !== null) {
+                $users = $event->getUsers();
+            }
         } else {
             $users = $userRepository->findAll();
         }
