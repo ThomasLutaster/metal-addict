@@ -22,6 +22,9 @@ class EventController extends AbstractController
         $queryParams = $request->query->all();
 
         if (array_key_exists("user", $queryParams)) {
+            if (!array_key_exists("order", $queryParams)) {
+                return $this->json("Missing order query parameter", 404);
+            }
             $events = $eventRepository->findByUser($queryParams["user"], $queryParams["order"]);
         } else {
             if (array_key_exists("countryId", $queryParams)) {
@@ -51,6 +54,9 @@ class EventController extends AbstractController
     public function read(SetlistApiGetDatas $setlistApiGetDatas, string $setlistId, FanartApiGetDatas $fanartApiGetDatas): Response
     {
         $setlistDatas = $setlistApiGetDatas->getApiSetlistEvent($setlistId);
+        if ($setlistDatas === null) {
+            return $this->json('The event doesn\'t exist', 404);
+        }
         $bandImages = $fanartApiGetDatas->getApiFanartImages($setlistDatas["artist"]["mbid"]);
 
         $event["setlist"] = $setlistDatas;
@@ -67,6 +73,9 @@ class EventController extends AbstractController
 
         if ($event === null) {
             $setlistEvent = $setlistApiGetDatas->getApiSetlistEvent($setlistId);
+            if ($setlistEvent ===  null) {
+                return $this->json('The event doesn\'t exist', 404);
+            }
             $event = new Event();
             $event->setSetlistId($setlistEvent['id']);
             $event->setVenue($setlistEvent['venue']['name']);

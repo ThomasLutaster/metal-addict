@@ -84,6 +84,10 @@ class SetlistApiGetDatas
             ]
         );
 
+        if ($response->getStatusCode() === 404) {
+            return null;
+        }
+
         return $response->toArray();
     }
 }

@@ -24,7 +24,11 @@ class ReviewController extends AbstractController
         $queryParams = $request->query->all();
         $reviews = [];
 
-        if (isset($queryParams['user']) && isset($queryParams['setlistId'])) {;
+        if (!array_key_exists("order", $queryParams)) {
+            return $this->json("Missing order query parameter", 404);
+        }
+
+        if (isset($queryParams['user']) && isset($queryParams['setlistId'])) {
             $reviews = $reviewRepository->findByUserAndEventIds($queryParams['order'], $queryParams['user'], $queryParams['setlistId']);
         }
 

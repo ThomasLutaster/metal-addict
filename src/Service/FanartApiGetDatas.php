@@ -32,6 +32,19 @@ class FanartApiGetDatas
             ]
         );
 
+        if ($response->getStatusCode() === 404) {
+            return [
+                'name' => '',
+                'mbid_id' => '',
+                'albums' => [],
+                'artistthumb' => [],
+                'hdmusiclogo' => [],
+                'musiclogo' => [],
+                'musicbanner' => [],
+                'artistbackground' => [],
+            ];
+        }
+
         return $response->toArray();
     }
 }
