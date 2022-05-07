@@ -31,8 +31,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string')]
     #[Assert\NotBlank(groups: ["registration"])]
-    #[Assert\Length(min: 8, max: 32, groups: ["registration", "edit"])]
-    #[Assert\Regex(pattern: "/^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W])(?=.*\d).{6,}$/i", groups: ["registration", "edit"])]
+    #[Assert\Length(min: 8, max: 32, groups: ["registration"])]
+    #[Assert\Regex(pattern: "/^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W])(?=.*\d).{6,}$/i", groups: ["registration"])]
     private $password;
 
     #[ORM\Column(type: 'string', length: 100)]
@@ -45,7 +45,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $biography;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Assert\Image(maxSize: '5M')]
     #[Groups(['picture_browse', 'user', 'review'])]
     private $avatar;
 

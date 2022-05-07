@@ -26,7 +26,7 @@ class PictureController extends AbstractController
     {
         $queryParams = $request->query->all();
 
-        if (!isset($queryParams['user']) && !isset($queryParams['setlistId']) && !isset($queryParams['review'])) {
+        if (!isset($queryParams['user']) && !isset($queryParams['setlistId']) && !isset($queryParams['review']) || !array_key_exists("order", $queryParams)) {
             return $this->json("Missing query parameters", 404);
         }
 
@@ -44,7 +44,16 @@ class PictureController extends AbstractController
 
         if (!isset($queryParams['user']) && !isset($queryParams['setlistId']) && isset($queryParams['review'])) {
             $review = $reviewRepository->find($queryParams['review']);
+
+            if ($review === null) {
+                return $this->json('The review doesn\'t exist', 404);
+            }
             $pictures = $pictureRepository->findByUserAndEvent($review->getUser()->getId(), $review->getEvent()->getSetlistId(), $queryParams['order']);
+            return $this->json($pictures, 200, [], ["groups" => "picture_browse"]);
+        }
+
+        if ((isset($queryParams['setlistId']) && isset($queryParams['review'])) || (isset($queryParams['user']) && isset($queryParams['review']))) {
+            return $this->json('Too many query parameters', 404);
         }
 
         return $this->json($pictures, 200, [], ["groups" => "picture_browse"]);
@@ -85,7 +94,7 @@ class PictureController extends AbstractController
 
         $pictureRepository->add($picture);
 
-        return $this->json($picture->getId(), 201);
+        return $this->json($picture, 201, [], ["groups" => "picture_browse"]);
     }
 
     #[Route('/{id<\d+>}', name: 'delete', methods: "DELETE")]

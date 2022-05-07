@@ -18,7 +18,7 @@ class Country
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['country_browse'])]
+    #[Groups(['country_browse', 'event_browse'])]
     private $name;
 
     #[ORM\Column(type: 'string', length: 255)]

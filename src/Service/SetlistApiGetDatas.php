@@ -54,6 +54,16 @@ class SetlistApiGetDatas
             ]
         );
 
+        if ($response->getStatusCode() === 404) {
+            return [
+                "type" => "setlists",
+                "itemsPerPage" => 20,
+                "page" => 1,
+                "total" => 0,
+                "setlist" => [],
+            ];
+        }
+
         return $response->toArray();
     }
 
@@ -73,6 +83,10 @@ class SetlistApiGetDatas
                 ],
             ]
         );
+
+        if ($response->getStatusCode() === 404) {
+            return null;
+        }
 
         return $response->toArray();
     }
