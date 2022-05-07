@@ -47,7 +47,10 @@ class PictureRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByUserAndEvent($user, $event, $order)
+    /**
+     * Find the pictures for a specific user and a specific event
+     */
+    public function findByUserAndEvent(int $user, string $event, string $order): ?array
     {
         return $this->createQueryBuilder('p')
             ->innerJoin('p.user', 'u')
@@ -61,7 +64,10 @@ class PictureRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByUser($user, $order)
+    /**
+     * Find the pictures for a specific user
+     */
+    public function findByUser(int $user, string $order): ?array
     {
         return $this->createQueryBuilder('p')
             ->innerJoin('p.user', 'u')
@@ -72,7 +78,10 @@ class PictureRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByEvent($event, $order)
+    /**
+     * Find the pictures for a specific event
+     */
+    public function findByEvent(string $event, string $order): ?array
     {
         return $this->createQueryBuilder('p')
             ->innerJoin('p.event', 'e')

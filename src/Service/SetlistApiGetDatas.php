@@ -17,9 +17,9 @@ class SetlistApiGetDatas
     }
 
     /**
-     *Get a country list with a fetch to setlist api
+     *Get a country list with a request to setlist api
      **/
-    public function getApiSetlistCountries()
+    public function getApiSetlistCountries(): array
     {
         $response = $this->client->request(
             'GET',
@@ -37,9 +37,9 @@ class SetlistApiGetDatas
     }
 
     /**
-     *Get an events list with a fetch to setlist api
+     *Get events with a request to setlist api
      **/
-    public function getApiSetlistSearch(array $params)
+    public function getApiSetlistSearch(array $params): array
     {
         $response = $this->client->request(
             'GET',
@@ -68,9 +68,9 @@ class SetlistApiGetDatas
     }
 
     /**
-     *Get an event with a fetch to setlist api
+     *Get an event with a request to setlist api
      **/
-    public function getApiSetlistEvent(string $setlistId)
+    public function getApiSetlistEvent(string $setlistId): ?array
     {
         $response = $this->client->request(
             'GET',

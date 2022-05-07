@@ -17,10 +17,12 @@ use Symfony\Component\HttpFoundation\Request;
 class EventController extends AbstractController
 {
     #[Route('', name: '', methods: 'GET')]
+    // Get all events for an user or with a search (depends on what query parameter is entered)
     public function browse(SetlistApiGetDatas $setlistApiGetDatas, EventRepository $eventRepository, FanartApiGetDatas $fanartApiGetDatas, Request $request, CountryRepository $countryRepository, BandRepository $bandRepository): Response
     {
         $queryParams = $request->query->all();
 
+        // if user query parameter exists, find events for an user 
         if (array_key_exists("user", $queryParams)) {
             if (!array_key_exists("order", $queryParams)) {
                 return $this->json("Missing order query parameter", 404);
@@ -43,7 +45,9 @@ class EventController extends AbstractController
                 }
             }
 
+            // get events
             $events = $setlistApiGetDatas->getApiSetlistSearch($queryParams);
+            // get band images
             $events["bandImages"] = $fanartApiGetDatas->getApiFanartImages($queryParams["artistMbid"]);
         }
 
@@ -51,6 +55,7 @@ class EventController extends AbstractController
     }
 
     #[Route('/{setlistId}', name: 'read', methods: 'GET')]
+    //Get one event
     public function read(SetlistApiGetDatas $setlistApiGetDatas, string $setlistId, FanartApiGetDatas $fanartApiGetDatas): Response
     {
         $setlistDatas = $setlistApiGetDatas->getApiSetlistEvent($setlistId);
@@ -59,18 +64,24 @@ class EventController extends AbstractController
         }
         $bandImages = $fanartApiGetDatas->getApiFanartImages($setlistDatas["artist"]["mbid"]);
 
+        // get event
         $event["setlist"] = $setlistDatas;
+        // get band images
         $event["bandImages"] = $bandImages;
 
         return $this->json($event, 200, [], ['groups' => 'event_browse']);
     }
 
     #[Route('/{setlistId}', name: 'add', methods: 'POST')]
+    // Add an user to an event. If the event is not in database, it will be save in.
     public function add($setlistId, EventRepository $eventRepository, SetlistApiGetDatas $setlistApiGetDatas, CountryRepository $countryRepository, BandRepository $bandRepository)
     {
+        // Search event in database
         $event = $eventRepository->findOneBy(['setlistId' => $setlistId]);
+
         $user = $this->getUser();
 
+        // if event isn't in the database
         if ($event === null) {
             $setlistEvent = $setlistApiGetDatas->getApiSetlistEvent($setlistId);
             if ($setlistEvent ===  null) {
@@ -87,7 +98,9 @@ class EventController extends AbstractController
             $eventRepository->add($event);
 
             return $this->json($event, 201, [], ['groups' => 'event_browse']);
-        } elseif ($event != null) {
+        }
+        // If event is in the database
+        elseif ($event != null) {
             if ($event->getUsers()->contains($user)) {
                 return $this->json("User already link to the event", 403);
             }

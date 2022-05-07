@@ -22,6 +22,7 @@ class Band
     private $name;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
+    // Band id in the musicbrainzApi. Use for search with setlistApi and fanartApi
     private $musicbrainzId;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]

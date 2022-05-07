@@ -14,9 +14,9 @@ class MusicbrainzApiGetDatas
     }
 
     /**
-     *Get a band list with a fetch to musicbrainz api
+     *Get a band list with a request to musicbrainz api
      **/
-    public function getMusicbrainzBands($offset, $genre = "metal")
+    public function getMusicbrainzBands($offset, $genre = "metal"): ?array
     {
         $response = $this->client->request(
             'GET',

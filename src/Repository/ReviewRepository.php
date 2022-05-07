@@ -2,11 +2,13 @@
 
 namespace App\Repository;
 
+use App\Entity\User;
+use App\Entity\Event;
 use App\Entity\Review;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Review>
@@ -47,7 +49,10 @@ class ReviewRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByUserAndEventIds($order = 'DESC', $userId, $setlistId)
+    /**
+     * Find the reviews for a specific user and a specific event using ids
+     */
+    public function findByUserAndEventIds(string $order = 'DESC', int $userId, string $setlistId): ?array
     {
         return $this->createQueryBuilder('r')
             ->innerJoin('r.user', 'u')
@@ -63,7 +68,10 @@ class ReviewRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByEvent($order, $setlistId)
+    /**
+     * Find the reviews for a specific event
+     */
+    public function findByEvent(string $order, string $setlistId): ?array
     {
         return $this->createQueryBuilder('r')
             ->innerJoin('r.event', 'e')
@@ -75,7 +83,10 @@ class ReviewRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByUser($order, $userId)
+    /**
+     * Find the reviews for a specific user
+     */
+    public function findByUser(string $order, int $userId): ?array
     {
         return $this->createQueryBuilder('r')
             ->innerJoin('r.user', 'u')
@@ -87,7 +98,10 @@ class ReviewRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByLatest($order = "DESC", $limit)
+    /**
+     * Find the reviews for a number of determined results
+     */
+    public function findByLatest(string $order = "DESC", int $limit): ?array
     {
         return $this->createQueryBuilder('r')
             ->orderBy('r.createdAt', $order)
@@ -95,7 +109,11 @@ class ReviewRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-    public function findByUserAndEvent($user, $event)
+
+    /**
+     * Find the pictures for a specific user and a specific event using user and event objects
+     */
+    public function findByUserAndEvent(User $user, Event $event): ?array
     {
         return $this->createQueryBuilder('r')
             ->andWhere('r.user = :user')

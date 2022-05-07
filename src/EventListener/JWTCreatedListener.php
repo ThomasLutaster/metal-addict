@@ -21,6 +21,8 @@ class JWTCreatedListener
     }
 
     /**
+     * Add datas in jwt payload
+     * 
      * @param JWTCreatedEvent $event
      *
      * @return void
