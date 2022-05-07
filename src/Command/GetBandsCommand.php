@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'app:get-bands',
-    description: 'AGet bands using Musicbrainz Api',
+    description: 'Get bands using Musicbrainz Api',
 )]
 class GetBandsCommand extends Command
 {
@@ -46,8 +46,8 @@ class GetBandsCommand extends Command
         }
 
 
-        //todo : modify loop to get more bands
-        for ($offset = 2001; $offset < 3002; $offset += 100) {
+        // Modify loop to get more bands
+        for ($offset = 4001; $offset < 5002; $offset += 100) {
             $bands = $this->musicbrainzApiGetDatas->getMusicbrainzBands($offset);
 
             foreach ($bands['artists'] as $apiBand) {

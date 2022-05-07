@@ -4,8 +4,6 @@ namespace App\Controller\Api\V1;
 
 use App\Entity\Event;
 use App\Entity\Review;
-use App\Repository\UserRepository;
-use App\Repository\EventRepository;
 use App\Repository\ReviewRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +17,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ReviewController extends AbstractController
 {
     #[Route('', name: '', methods: 'GET')]
-    public function browse(Request $request, ReviewRepository $reviewRepository, EventRepository $eventRepository, UserRepository $UserRepository): Response
+    // Get pictures for an user, an event or all pictures with possibility to indicate a limit number (depends on query parameters)
+    public function browse(Request $request, ReviewRepository $reviewRepository): Response
     {
         $queryParams = $request->query->all();
         $reviews = [];
@@ -58,6 +57,7 @@ class ReviewController extends AbstractController
     }
 
     #[Route('/{setlistId}', name: 'add', methods: 'POST')]
+    // Add a review for an event linked to the connected user.
     public function add(?Event $event, ReviewRepository $reviewRepository, Request $request, SerializerInterface $serializer, ValidatorInterface $validatorInterface): Response
     {
         $user = $this->getUser();

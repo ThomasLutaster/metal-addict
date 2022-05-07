@@ -47,10 +47,10 @@ class EventRepository extends ServiceEntityRepository
         }
     }
 
-    // /**
-    //  * @return Event[] Returns an array of Event objects
-    //  */
-    public function findByUser($userId, $orderBy)
+    /**
+     * Find the events in which a user has participated
+     */
+    public function findByUser(int $userId, string $orderBy): ?array
     {
         return $this->createQueryBuilder('e')
             ->innerJoin('e.users', 'u')

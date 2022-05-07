@@ -15,9 +15,9 @@ class FanartApiGetDatas
     }
 
     /**
-     *Get an images list with a fetch to fanart api
+     *Get band images with a request to fanart api
      **/
-    public function getApiFanartImages(string $mbId)
+    public function getApiFanartImages(string $mbId): array
     {
         $response = $this->client->request(
             'GET',

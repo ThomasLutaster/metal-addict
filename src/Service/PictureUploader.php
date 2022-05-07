@@ -13,7 +13,10 @@ class PictureUploader
     {
     }
 
-    public function upload(UploadedFile $file, string $path)
+    /**
+     *Rename and upload a picture
+     **/
+    public function upload(UploadedFile $file, string $path): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);

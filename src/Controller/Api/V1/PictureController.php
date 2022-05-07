@@ -4,10 +4,8 @@ namespace App\Controller\Api\V1;
 
 use App\Entity\Event;
 use App\Entity\Picture;
-use App\Repository\EventRepository;
 use App\Repository\PictureRepository;
 use App\Repository\ReviewRepository;
-use App\Repository\UserRepository;
 use App\Service\PictureUploader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +20,8 @@ use Symfony\Component\Filesystem\Filesystem;
 class PictureController extends AbstractController
 {
     #[Route('', name: '', methods: "GET")]
-    public function browse(Request $request, EventRepository $eventRepository, UserRepository $userRepository, ReviewRepository $reviewRepository, PictureRepository $pictureRepository): Response
+    // Get pictures for an user, a review or an event (depends on query parameters)
+    public function browse(Request $request, ReviewRepository $reviewRepository, PictureRepository $pictureRepository): Response
     {
         $queryParams = $request->query->all();
 
@@ -30,18 +29,22 @@ class PictureController extends AbstractController
             return $this->json("Missing query parameters", 404);
         }
 
+        // Get pictures for a specific user and a specific event
         if (isset($queryParams['user']) && isset($queryParams['setlistId']) && !isset($queryParams['review'])) {
             $pictures = $pictureRepository->findByUserAndEvent($queryParams['user'], $queryParams['setlistId'], $queryParams['order']);
         }
 
+        // Get pictures for a specific event
         if (!isset($queryParams['user']) && isset($queryParams['setlistId']) && !isset($queryParams['review'])) {
             $pictures = $pictureRepository->findByEvent($queryParams['setlistId'], $queryParams['order']);
         }
 
+        // Get pictures for a specific user
         if (isset($queryParams['user']) && !isset($queryParams['setlistId']) && !isset($queryParams['review'])) {
             $pictures = $pictureRepository->findByUser($queryParams['user'], $queryParams['order']);
         }
 
+        // Get pictures for a specific review
         if (!isset($queryParams['user']) && !isset($queryParams['setlistId']) && isset($queryParams['review'])) {
             $review = $reviewRepository->find($queryParams['review']);
 
@@ -60,6 +63,7 @@ class PictureController extends AbstractController
     }
 
     #[Route('/{setlistId}', name: 'add', methods: "POST")]
+    // Add a picture for an event
     public function index(?Event $event, Request $request, ValidatorInterface $validator, PictureUploader $pictureUploader, PictureRepository $pictureRepository): Response
     {
         $user = $this->getUser();
