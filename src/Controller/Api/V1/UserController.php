@@ -37,7 +37,7 @@ class UserController extends AbstractController
             $users = $userRepository->findAll();
         }
 
-        return $this->json($users, 200, [], ['groups' => 'user']);
+        return $this->json($users, 200, [], ['groups' => 'user_get']);
     }
 
     #[Route('/{id}', name: 'read', methods: 'GET')]
@@ -47,7 +47,7 @@ class UserController extends AbstractController
             return $this->json('The user doesn\'t exist', 404);
         }
 
-        return $this->json($user, 200, [], ['groups' => 'user']);
+        return $this->json($user, 200, [], ['groups' => 'user_get']);
     }
 
     #[Route('', name: 'add', methods: 'POST')]
