@@ -41,11 +41,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $nickname;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Groups(['user'])]
+    #[Groups(['user', 'user_get'])]
     private $biography;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Groups(['picture_browse', 'user', 'review'])]
+    #[Groups(['picture_browse', 'user', 'user_get', 'review'])]
     private $avatar;
 
     #[ORM\Column(type: 'datetime')]
