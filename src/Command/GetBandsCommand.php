@@ -46,8 +46,8 @@ class GetBandsCommand extends Command
         }
 
 
-        // Modify loop to get more bands
-        for ($offset = 4001; $offset < 5002; $offset += 100) {
+        // Modify offset and loop parameters to get more bands
+        for ($offset = 1; $offset < 5002; $offset += 100) {
             $bands = $this->musicbrainzApiGetDatas->getMusicbrainzBands($offset);
 
             foreach ($bands['artists'] as $apiBand) {
@@ -62,7 +62,7 @@ class GetBandsCommand extends Command
                 }
             }
             $this->em->flush();
-            usleep(2000000);
+            usleep(1000000);
         }
 
 
